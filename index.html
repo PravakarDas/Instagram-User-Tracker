@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Summary</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Instagram Summary</h1>
+        <form id="uploadForm">
+            <label for="fileInput">Upload summary.json file:</label>
+            <input type="file" id="fileInput" accept=".json" required>
+            <button type="submit">Upload</button>
+        </form>
+        <div class="summary">
+            <p>Total Followers: <span id="totalFollowers"></span></p>
+            <p>Total Following: <span id="totalFollowing"></span></p>
+            <div class="columns">
+                <div class="column">
+                    <h3>Not Following Back (Total: <span id="totalNotFollowingBack"></span>)</h3>
+                    <ol id="notFollowingBack"></ol>
+                </div>
+                <div class="column">
+                    <h3>Unknown Followers (Total: <span id="totalUnknownFollowers"></span>)</h3>
+                    <ol id="unknownFollowers"></ol>
+                </div>
+                <div class="column">
+                    <h3>Pending Follow Requests (Total: <span id="totalPendingFollowRequests"></span>)</h3>
+                    <ol id="pendingFollowRequests"></ol>
+                </div>
+                <div class="column">
+                    <h3>Received Follow Requests (Total: <span id="totalReceivedFollowRequests"></span>)</h3>
+                    <ol id="receivedFollowRequests"></ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

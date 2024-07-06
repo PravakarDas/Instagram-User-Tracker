@@ -1,0 +1,138 @@
+/* Global Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden; /* Prevent body scroll when .container is scrollable */
+}
+
+.container {
+    max-width: 800px;
+    width: 90%;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    max-height: 100vh;
+    overflow-y: auto; /* Enable vertical scroll */
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+form {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+form label {
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+form input[type="file"] {
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+}
+
+form button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form button:hover {
+    background-color: #45a049;
+}
+
+.summary {
+    margin-top: 20px;
+}
+
+.columns {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.column {
+    flex-basis: 48%;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.column h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+ol {
+    list-style: none;
+    padding: 0;
+}
+
+.list-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative; /* Ensure relative positioning for list items */
+    transition: background-color 0.3s ease;
+}
+
+.list-item:hover {
+    background-color: #f0f0f0;
+}
+
+.username {
+    margin-left: 10px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+}
+
+.hover-popup {
+    display: none;
+    position: absolute;
+    top: calc(100% + 5px); /* Position below the username */
+    left: 0;
+    width: 200px; /* Adjust width as needed */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    z-index: 1;
+}
+
+.hover-popup p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .column {
+        flex-basis: 100%;
+    }
+}
