@@ -16,18 +16,28 @@ with open('followers_1.json', 'r') as file:
 with open('pending_follow_requests.json', 'r') as file:
     pending_requests_data = json.load(file)
 
-with open('follow_requests_you_received.json', 'r') as file:
+with open("follow_requests_you've_received.json", 'r') as file:
     received_requests_data = json.load(file)
 
 # Extract the Instagram usernames from each file
-following_usernames = {entry['string_list_data'][0]['value'] for entry in following_data}
+# following_usernames = {entry['string_list_data'][0]['value'] for entry in following_data}
+
+entries = following_data["relationships_following"]
+following_usernames = {entry['string_list_data'][0]['value'] for entry in entries}
+
 followers_usernames = {entry['string_list_data'][0]['value'] for entry in followers_data}
-pending_requests_usernames = {entry['string_list_data'][0]['value'] for entry in pending_requests_data}
-received_requests_usernames = {entry['string_list_data'][0]['value'] for entry in received_requests_data}
+
+# pending_requests_usernames = {entry['string_list_data'][0]['value'] for entry in pending_requests_data}
+entries = pending_requests_data["relationships_follow_requests_sent"]
+pending_requests_usernames={entry['string_list_data'][0]['value'] for entry in entries}
+
+# received_requests_usernames = {entry['string_list_data'][0]['value'] for entry in received_requests_data}
+entries = received_requests_data["relationships_follow_requests_received"]
+received_requests_usernames={entry['string_list_data'][0]['value'] for entry in entries}
 
 # Find the usernames that are in following but not in followers
 not_following_back = following_usernames - followers_usernames
-
+print(not_following_back)
 # Find the usernames that are in followers but not in following
 unknown_followers = followers_usernames - following_usernames
 
@@ -38,9 +48,9 @@ not_following_back_data = [
         "href": entry['string_list_data'][0]['href'],
         "timestamp": convert_timestamp(entry['string_list_data'][0]['timestamp'])
     }
-    for entry in following_data if entry['string_list_data'][0]['value'] in not_following_back
+    for entry in following_data["relationships_following"] if entry['string_list_data'][0]['value'] in not_following_back
 ]
-
+print(not_following_back_data)
 # Extract the data for unknown followers
 unknown_followers_data = [
     {
@@ -58,7 +68,7 @@ pending_requests_data = [
         "href": entry['string_list_data'][0]['href'],
         "timestamp": convert_timestamp(entry['string_list_data'][0]['timestamp'])
     }
-    for entry in pending_requests_data
+    for entry in pending_requests_data["relationships_follow_requests_sent"]
 ]
 
 # Extract the data for received follow requests
@@ -68,7 +78,7 @@ received_requests_data = [
         "href": entry['string_list_data'][0]['href'],
         "timestamp": convert_timestamp(entry['string_list_data'][0]['timestamp'])
     }
-    for entry in received_requests_data
+    for entry in received_requests_data["relationships_follow_requests_received"]
 ]
 # Prepare the summary data
 summary_data = {
