@@ -1,22 +1,22 @@
 import json
 import datetime
-
+assets_folder = 'assets/'
 # Function to convert Unix timestamp to human-readable date
 def convert_timestamp(timestamp):
     dt_object = datetime.datetime.fromtimestamp(timestamp)
     return dt_object.strftime('%Y-%m-%d %H:%M:%S')
 
 # Load the JSON data from the files
-with open('following.json', 'r') as file:
+with open(f'{assets_folder}following.json', 'r') as file:
     following_data = json.load(file)
 
-with open('followers_1.json', 'r') as file:
+with open(f'{assets_folder}followers_1.json', 'r') as file:
     followers_data = json.load(file)
 
-with open('pending_follow_requests.json', 'r') as file:
+with open(f'{assets_folder}pending_follow_requests.json', 'r') as file:
     pending_requests_data = json.load(file)
 
-with open("follow_requests_you've_received.json", 'r') as file:
+with open(f'{assets_folder}follow_requests_you\'ve_received.json', 'r') as file:
     received_requests_data = json.load(file)
 
 # Extract the Instagram usernames from each file
@@ -37,7 +37,7 @@ received_requests_usernames={entry['string_list_data'][0]['value'] for entry in 
 
 # Find the usernames that are in following but not in followers
 not_following_back = following_usernames - followers_usernames
-print(not_following_back)
+# print(not_following_back)
 # Find the usernames that are in followers but not in following
 unknown_followers = followers_usernames - following_usernames
 
@@ -50,7 +50,7 @@ not_following_back_data = [
     }
     for entry in following_data["relationships_following"] if entry['string_list_data'][0]['value'] in not_following_back
 ]
-print(not_following_back_data)
+# print(not_following_back_data)
 # Extract the data for unknown followers
 unknown_followers_data = [
     {
