@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON File Viewer</title>
+
+    <!-- Import Iceland Font -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Iceland&display=swap');
+
+        body {
+            font-family: "Iceland", serif;
+            background-color: #2C3930;
+            color: #DCD7C9;
+        }
+
+        .container {
+            max-width: 95%;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #3F4F44;
+            color: #DCD7C9;
+        }
+
+        th, td {
+            border: 1px solid #A27B5C;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #A27B5C;
+            color: #2C3930;
+        }
+
+        a {
+            color: #DCD7C9;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            color: #A27B5C;
+        }
+
+        .header {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #A27B5C;
+        }
+
+        input {
+            display: block;
+            margin: 0 auto;
+            padding: 10px;
+            border: 2px solid #A27B5C;
+            background-color: #3F4F44;
+            color: #DCD7C9;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 50%;
+        }
+
+        input:hover {
+            border-color: #DCD7C9;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: #A27B5C;
+            margin-top: 20px;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="header">📂 Upload Your ZIP File to See the Magic!</h2>
+        <input type="file" id="fileInput" accept=".zip">
+        <div id="output" class="mt-6 w-full"></div>
+    </div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const zip = new JSZip();
+                zip.loadAsync(file).then(function(zip) {
+                    let filePromises = [];
+
+                    zip.forEach((relativePath, zipEntry) => {
+                        if (zipEntry.name.endsWith(".json")) {
+                            filePromises.push(
+                                zipEntry.async("string").then(content => {
+                                    return { name: zipEntry.name.toLowerCase(), content: JSON.parse(content) };
+                                })
+                            );
+                        }
+                    });
+
+                    Promise.all(filePromises).then(files => {
+                        displayData(files);
+                    });
+                });
+            }
+        });
+
+        function displayData(files) {
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = '';
+
+            let followingSet = new Set();
+            let followersSet = new Set();
+            let followingList = [];
+            let followersList = [];
+
+            files.forEach(file => {
+                const title = document.createElement('h3');
+                title.textContent = getFriendlyTitle(file.name);
+                outputDiv.appendChild(title);
+
+                const tableContainer = document.createElement('div');
+                tableContainer.className = "table-container mt-2";
+
+                const dataList = extractData(file.content);
+                const table = document.createElement('table');
+
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dataList.map(entry => {
+                            if (file.name.includes("following.json")) {
+                                followingSet.add(entry.value);
+                                followingList.push(entry);
+                            }
+                            if (file.name.includes("followers_1.json")) {
+                                followersSet.add(entry.value);
+                                followersList.push(entry);
+                            }
+
+                            return `
+                                <tr>
+                                    <td>
+                                        <a href="${entry.href}" target="_blank">${entry.value}</a>
+                                    </td>
+                                    <td>${entry.timestamp}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                `;
+
+                tableContainer.appendChild(table);
+                outputDiv.appendChild(tableContainer);
+            });
+
+            // 💔 Find "Mirjafars" (People you follow but don't follow back)
+            let mirjafars = followingList.filter(person => !followersSet.has(person.value));
+
+            if (mirjafars.length > 0) {
+                const mirjafarTitle = document.createElement('h3');
+                mirjafarTitle.textContent = "😡💔 These are Mirjafars whom you are following, but they did not follow you back!!";
+                outputDiv.appendChild(mirjafarTitle);
+
+                const tableContainer = document.createElement('div');
+                tableContainer.className = "table-container mt-2";
+
+                const table = document.createElement('table');
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mirjafars.map(entry => `
+                            <tr>
+                                <td>
+                                    <a href="${entry.href}" target="_blank">${entry.value}</a>
+                                </td>
+                                <td>${entry.timestamp}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                `;
+
+                tableContainer.appendChild(table);
+                outputDiv.appendChild(tableContainer);
+            }
+        }
+
+        function extractData(jsonData) {
+            let result = [];
+            const keys = [
+                "relationships_follow_requests_received",
+                "relationships_following",
+                "relationships_follow_requests_sent",
+                "relationships_permanent_follow_requests",
+                "relationships_unfollowed_users"
+            ];
+
+            if (Array.isArray(jsonData)) {
+                jsonData.forEach(item => {
+                    if (item.string_list_data) {
+                        result.push(...item.string_list_data.map(data => formatEntry(data)));
+                    }
+                });
+            } else {
+                keys.forEach(key => {
+                    if (jsonData[key]) {
+                        jsonData[key].forEach(item => {
+                            if (item.string_list_data) {
+                                result.push(...item.string_list_data.map(data => formatEntry(data)));
+                            }
+                        });
+                    }
+                });
+            }
+            return result;
+        }
+
+        function formatEntry(entry) {
+            return {
+                href: entry.href,
+                value: entry.value,
+                timestamp: new Date(entry.timestamp * 1000).toLocaleString()
+            };
+        }
+
+        function getFriendlyTitle(fileName) {
+            fileName = fileName.toLowerCase();
+            
+            switch (true) {
+                case fileName.endsWith("follow_requests_you've_received.json"):
+                    return "🚀 These people are requesting to follow you!!";
+                case fileName.endsWith("followers_1.json"):
+                    return "🎉 They are following you already!!";
+                case fileName.endsWith("following.json"):
+                    return "👀 You are following them!!";
+                case fileName.endsWith("pending_follow_requests.json"):
+                    return "😢 You sent them a follow request, but they still didn't accept!";
+                case fileName.endsWith("recent_follow_requests.json"):
+                    return "✨ These people recently added you!";
+                case fileName.endsWith("recently_unfollowed_profiles.json"):
+                    return "💔 You unfollowed these people recently.";
+                default:
+                    return "📜 Here's your data!";
+            }
+        }
+    </script>
+
+</body>
+</html>
