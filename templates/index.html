@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram User Tracker</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Custom Animations -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header-section {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        
+        .header-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .upload-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-help {
+            color: #adb5bd;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+        
+        .user-list-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .user-list-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header-custom {
+            padding: 1rem 1.5rem;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .badge-count {
+            background: rgba(255,255,255,0.3);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 1rem;
+        }
+        
+        .user-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .user-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .username-link {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: 600;
+            flex: 1;
+        }
+        
+        .username-link:hover {
+            color: #0a58ca;
+            text-decoration: underline;
+        }
+        
+        .timestamp-badge {
+            font-size: 0.75rem;
+            color: #6c757d;
+            background: #fff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .btn-analyze {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-analyze:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .alert-info-custom {
+            background: #e7f3ff;
+            border-left: 4px solid #0d6efd;
+            border-radius: 8px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            padding: 0.6rem;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            padding: 2rem 0 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .spinner-border {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 768px) {
+            .header-section h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header-section p {
+                font-size: 1rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Scrollbar Styling */
+        .user-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .user-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .user-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .user-list::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header Section -->
+        <div class="header-section animate__animated animate__fadeInDown">
+            <h1><i class="bi bi-instagram"></i> Instagram User Tracker</h1>
+            <p>Analyze your Instagram followers and following</p>
+        </div>
+        
+        <!-- Upload Section -->
+        <div class="upload-card animate__animated animate__fadeInUp">
+            <h3 class="mb-4"><i class="bi bi-folder2-open"></i> Upload Instagram Data Files</h3>
+            
+            <div class="alert alert-info-custom" role="alert">
+                <strong><i class="bi bi-info-circle"></i> How to get your data:</strong><br>
+                Go to Instagram → Your Activity → Download Your Information → 
+                Select "Followers and Following" → Download as JSON<br>
+                <small class="text-muted mt-2 d-block">
+                    After downloading, extract the ZIP file and navigate to: 
+                    <code>connections/followers_and_following/</code>
+                </small>
+            </div>
+            
+            <form id="uploadForm">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="followingFile" class="form-label">
+                            <i class="bi bi-file-earmark-code"></i> Following (following.json)
+                        </label>
+                        <input type="file" class="form-control" id="followingFile" accept=".json" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="followersFile" class="form-label">
+                            <i class="bi bi-file-earmark-code"></i> Followers (followers_1.json)
+                        </label>
+                        <input type="file" class="form-control" id="followersFile" accept=".json" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="pendingFile" class="form-label">
+                            <i class="bi bi-file-earmark-code"></i> Pending Requests 
+                            <small class="text-muted">(pending_follow_requests.json or recent_follow_requests.json)</small>
+                        </label>
+                        <input type="file" class="form-control" id="pendingFile" accept=".json" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="receivedFile" class="form-label">
+                            <i class="bi bi-file-earmark-code"></i> Received Requests (follow_requests_you've_received.json)
+                        </label>
+                        <input type="file" class="form-control" id="receivedFile" accept=".json" required>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg btn-analyze">
+                        <i class="bi bi-rocket-takeoff"></i> Analyze Data
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="text-center d-none">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        
+        <!-- Results Section -->
+        <div id="resultsSection" class="d-none">
+            <!-- Statistics Cards -->
+            <div class="row g-4 mb-4 animate__animated animate__fadeIn">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-card">
+                        <div class="stat-label"><i class="bi bi-people-fill"></i> Total Followers</div>
+                        <div class="stat-number text-success" id="totalFollowers">0</div>
+                        <div class="stat-help">People following you</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-card">
+                        <div class="stat-label"><i class="bi bi-person-check-fill"></i> Total Following</div>
+                        <div class="stat-number text-primary" id="totalFollowing">0</div>
+                        <div class="stat-help">People you follow</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-card">
+                        <div class="stat-label"><i class="bi bi-person-x-fill"></i> Not Following Back</div>
+                        <div class="stat-number text-danger" id="totalNotFollowingBack">0</div>
+                        <div class="stat-help">Don't follow you back</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-card">
+                        <div class="stat-label"><i class="bi bi-person-fill-question"></i> Unknown Followers</div>
+                        <div class="stat-number text-purple" style="color: #764ba2;" id="totalUnknownFollowers">0</div>
+                        <div class="stat-help">You don't follow back</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Lists -->
+            <div class="row g-4">
+                <!-- Not Following Back -->
+                <div class="col-lg-6">
+                    <div class="user-list-card animate__animated animate__fadeInLeft">
+                        <div class="card-header-custom" style="background: linear-gradient(135deg, #dc3545, #c82333);">
+                            <span><i class="bi bi-x-circle-fill"></i> Not Following Back</span>
+                            <span class="badge-count" id="badgeNotFollowingBack">0</span>
+                        </div>
+                        <div class="user-list" id="notFollowingBackList">
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p>Upload files to see results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Unknown Followers -->
+                <div class="col-lg-6">
+                    <div class="user-list-card animate__animated animate__fadeInRight">
+                        <div class="card-header-custom" style="background: linear-gradient(135deg, #764ba2, #667eea);">
+                            <span><i class="bi bi-person-badge"></i> Unknown Followers</span>
+                            <span class="badge-count" id="badgeUnknownFollowers">0</span>
+                        </div>
+                        <div class="user-list" id="unknownFollowersList">
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p>Upload files to see results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pending Requests -->
+                <div class="col-lg-6">
+                    <div class="user-list-card animate__animated animate__fadeInLeft">
+                        <div class="card-header-custom" style="background: linear-gradient(135deg, #fd7e14, #f85a27);">
+                            <span><i class="bi bi-hourglass-split"></i> Pending Requests</span>
+                            <span class="badge-count" id="badgePendingRequests">0</span>
+                        </div>
+                        <div class="user-list" id="pendingRequestsList">
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p>Upload files to see results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Received Requests -->
+                <div class="col-lg-6">
+                    <div class="user-list-card animate__animated animate__fadeInRight">
+                        <div class="card-header-custom" style="background: linear-gradient(135deg, #20c997, #17a589);">
+                            <span><i class="bi bi-inbox-fill"></i> Received Requests</span>
+                            <span class="badge-count" id="badgeReceivedRequests">0</span>
+                        </div>
+                        <div class="user-list" id="receivedRequestsList">
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p>Upload files to see results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                Made with <i class="bi bi-heart-fill text-danger"></i> | 
+                <a href="https://pdfolio-rho.vercel.app/" target="_blank">Pravakar Das</a> © 2026
+            </p>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-bell-fill me-2"></i>
+                <strong class="me-auto" id="toastTitle">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                Message here
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toast notification function
+        function showToast(title, message, type = 'info') {
+            const toastEl = document.getElementById('notificationToast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastHeader = toastEl.querySelector('.toast-header');
+            
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            // Set color based on type
+            toastHeader.className = 'toast-header';
+            if (type === 'success') {
+                toastHeader.classList.add('bg-success', 'text-white');
+            } else if (type === 'error') {
+                toastHeader.classList.add('bg-danger', 'text-white');
+            } else {
+                toastHeader.classList.add('bg-info', 'text-white');
+            }
+            
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+        
+        // Populate user list
+        function populateUserList(users, listId, badgeId) {
+            const listElement = document.getElementById(listId);
+            const badgeElement = document.getElementById(badgeId);
+            
+            badgeElement.textContent = users.length;
+            listElement.innerHTML = '';
+            
+            if (users.length === 0) {
+                listElement.innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-check-circle"></i>
+                        <p>No users in this category</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            users.forEach((user, index) => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.innerHTML = `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="user_${listId}_${index}">
+                        <label class="form-check-label" for="user_${listId}_${index}">
+                            <a href="${user.href}" target="_blank" class="username-link" title="Since ${user.timestamp}">
+                                ${index + 1}. ${user.value}
+                            </a>
+                        </label>
+                    </div>
+                    <span class="timestamp-badge">${user.timestamp}</span>
+                `;
+                listElement.appendChild(userItem);
+            });
+        }
+        
+        // Handle form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const followingFile = document.getElementById('followingFile').files[0];
+            const followersFile = document.getElementById('followersFile').files[0];
+            const pendingFile = document.getElementById('pendingFile').files[0];
+            const receivedFile = document.getElementById('receivedFile').files[0];
+            
+            if (!followingFile || !followersFile || !pendingFile || !receivedFile) {
+                showToast('Missing Files', 'Please upload all four required JSON files', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('following', followingFile);
+            formData.append('followers', followersFile);
+            formData.append('pending', pendingFile);
+            formData.append('received', receivedFile);
+            
+            // Show loading spinner
+            document.getElementById('loadingSpinner').classList.remove('d-none');
+            document.getElementById('resultsSection').classList.add('d-none');
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to process files');
+                }
+                
+                // Update statistics
+                document.getElementById('totalFollowers').textContent = data['Total Followers'];
+                document.getElementById('totalFollowing').textContent = data['Total Following'];
+                document.getElementById('totalNotFollowingBack').textContent = data['Total Not Following Back'];
+                document.getElementById('totalUnknownFollowers').textContent = data['Total Unknown Followers'];
+                
+                // Populate user lists
+                populateUserList(data['Not Following Back'], 'notFollowingBackList', 'badgeNotFollowingBack');
+                populateUserList(data['Unknown Followers'], 'unknownFollowersList', 'badgeUnknownFollowers');
+                populateUserList(data['Pending Follow Requests'], 'pendingRequestsList', 'badgePendingRequests');
+                populateUserList(data['Received Follow Requests'], 'receivedRequestsList', 'badgeReceivedRequests');
+                
+                // Show results
+                document.getElementById('loadingSpinner').classList.add('d-none');
+                document.getElementById('resultsSection').classList.remove('d-none');
+                
+                // Scroll to results
+                document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+                
+                showToast('Success!', 'Instagram data processed successfully', 'success');
+                
+            } catch (error) {
+                document.getElementById('loadingSpinner').classList.add('d-none');
+                showToast('Error', error.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>
