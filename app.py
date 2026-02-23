@@ -2,12 +2,14 @@ from flask import Flask, render_template, request, jsonify
 import json
 import datetime
 import os
+import zipfile
+import io
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size for ZIP
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['ALLOWED_EXTENSIONS'] = {'json'}
+app.config['ALLOWED_EXTENSIONS'] = {'json', 'zip'}
 
 # Create uploads folder if it doesn't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -19,6 +21,80 @@ def convert_timestamp(timestamp):
     """Convert Unix timestamp to human-readable date"""
     dt_object = datetime.datetime.fromtimestamp(timestamp)
     return dt_object.strftime('%Y-%m-%d %H:%M:%S')
+
+def extract_json_from_zip(zip_file):
+    """Extract required JSON files from Instagram ZIP archive"""
+    try:
+        # Read the ZIP file
+        zip_data = zip_file.read()
+        zip_buffer = io.BytesIO(zip_data)
+        
+        files = {}
+        required_files = {
+            'following': ['following.json'],
+            'followers': ['followers_1.json', 'followers.json'],
+            'pending': ['pending_follow_requests.json', 'recent_follow_requests.json'],
+            'received': ['follow_requests_you\'ve_received.json', 'follow_requests_youve_received.json']
+        }
+        
+        with zipfile.ZipFile(zip_buffer, 'r') as zip_ref:
+            # List all files in ZIP
+            file_list = zip_ref.namelist()
+            
+            # Find the connections/followers_and_following folder
+            target_folder = None
+            for file_path in file_list:
+                if 'connections/followers_and_following/' in file_path or 'connections\\followers_and_following\\' in file_path:
+                    # Normalize path separators
+                    normalized_path = file_path.replace('\\', '/')
+                    parts = normalized_path.split('/')
+                    
+                    # Get the base folder path
+                    if 'followers_and_following' in parts:
+                        idx = parts.index('followers_and_following')
+                        target_folder = '/'.join(parts[:idx+1]) + '/'
+                        break
+            
+            if not target_folder:
+                raise Exception("Could not find 'connections/followers_and_following/' folder in ZIP file. Make sure you uploaded the correct Instagram data archive.")
+            
+            # Extract required JSON files
+            for key, possible_names in required_files.items():
+                found = False
+                for filename in possible_names:
+                    # Try both forward and backward slashes
+                    possible_paths = [
+                        target_folder + filename,
+                        target_folder.replace('/', '\\') + filename
+                    ]
+                    
+                    for file_path in file_list:
+                        normalized_file_path = file_path.replace('\\', '/')
+                        if normalized_file_path.endswith(filename) and target_folder in normalized_file_path:
+                            # Found the file!
+                            json_data = zip_ref.read(file_path)
+                            files[key] = io.BytesIO(json_data)
+                            found = True
+                            break
+                    
+                    if found:
+                        break
+                
+                if not found:
+                    # For optional files, create empty structure
+                    if key == 'pending':
+                        files[key] = io.BytesIO(b'{"relationships_follow_requests_sent": []}')
+                    elif key == 'received':
+                        files[key] = io.BytesIO(b'{"relationships_follow_requests_received": []}')
+                    else:
+                        raise Exception(f"Required file not found in ZIP: {' or '.join(possible_names)}")
+        
+        return files
+        
+    except zipfile.BadZipFile:
+        raise Exception("Invalid ZIP file. Please upload a valid Instagram data archive.")
+    except Exception as e:
+        raise Exception(f"Error extracting ZIP file: {str(e)}")
 
 def process_instagram_data(files):
     """Process Instagram JSON files and generate summary"""
@@ -168,19 +244,30 @@ def index():
 def upload_files():
     """Handle file uploads and process Instagram data"""
     try:
-        # Check if all required files are present
-        required_files = ['following', 'followers', 'pending', 'received']
-        if not all(file in request.files for file in required_files):
-            return jsonify({'error': 'All four files are required'}), 400
-        
-        files = {}
-        for file_key in required_files:
-            file = request.files[file_key]
-            if file.filename == '':
-                return jsonify({'error': f'{file_key} file is empty'}), 400
-            if not allowed_file(file.filename):
-                return jsonify({'error': f'{file_key} must be a JSON file'}), 400
-            files[file_key] = file
+        # Check if a ZIP file was uploaded
+        if 'zipfile' in request.files and request.files['zipfile'].filename != '':
+            zip_file = request.files['zipfile']
+            
+            if not allowed_file(zip_file.filename):
+                return jsonify({'error': 'Please upload a ZIP file'}), 400
+            
+            # Extract JSON files from ZIP
+            files = extract_json_from_zip(zip_file)
+            
+        else:
+            # Check if all required individual files are present
+            required_files = ['following', 'followers', 'pending', 'received']
+            if not all(file in request.files for file in required_files):
+                return jsonify({'error': 'Please upload either a ZIP file or all four JSON files'}), 400
+            
+            files = {}
+            for file_key in required_files:
+                file = request.files[file_key]
+                if file.filename == '':
+                    return jsonify({'error': f'{file_key} file is empty'}), 400
+                if not allowed_file(file.filename):
+                    return jsonify({'error': f'{file_key} must be a JSON file'}), 400
+                files[file_key] = file
         
         # Process the data
         summary = process_instagram_data(files)

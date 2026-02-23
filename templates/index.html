@@ -270,56 +270,102 @@
         
         <!-- Upload Section -->
         <div class="upload-card animate__animated animate__fadeInUp">
-            <h3 class="mb-4"><i class="bi bi-folder2-open"></i> Upload Instagram Data Files</h3>
+            <h3 class="mb-4"><i class="bi bi-folder2-open"></i> Upload Instagram Data</h3>
             
             <div class="alert alert-info-custom" role="alert">
                 <strong><i class="bi bi-info-circle"></i> How to get your data:</strong><br>
                 Go to Instagram → Your Activity → Download Your Information → 
-                Select "Followers and Following" → Download as JSON<br>
-                <small class="text-muted mt-2 d-block">
-                    After downloading, extract the ZIP file and navigate to: 
-                    <code>connections/followers_and_following/</code>
-                </small>
+                Select "Followers and Following" → Download as JSON
             </div>
             
-            <form id="uploadForm">
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label for="followingFile" class="form-label">
-                            <i class="bi bi-file-earmark-code"></i> Following (following.json)
-                        </label>
-                        <input type="file" class="form-control" id="followingFile" accept=".json" required>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label for="followersFile" class="form-label">
-                            <i class="bi bi-file-earmark-code"></i> Followers (followers_1.json)
-                        </label>
-                        <input type="file" class="form-control" id="followersFile" accept=".json" required>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label for="pendingFile" class="form-label">
-                            <i class="bi bi-file-earmark-code"></i> Pending Requests 
-                            <small class="text-muted">(pending_follow_requests.json or recent_follow_requests.json)</small>
-                        </label>
-                        <input type="file" class="form-control" id="pendingFile" accept=".json" required>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label for="receivedFile" class="form-label">
-                            <i class="bi bi-file-earmark-code"></i> Received Requests (follow_requests_you've_received.json)
-                        </label>
-                        <input type="file" class="form-control" id="receivedFile" accept=".json" required>
-                    </div>
+            <!-- Upload Method Tabs -->
+            <ul class="nav nav-pills nav-justified mb-4" id="uploadMethodTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="zip-tab" data-bs-toggle="pill" data-bs-target="#zip-upload" type="button" role="tab">
+                        <i class="bi bi-file-zip"></i> Upload ZIP File (Easy!)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="individual-tab" data-bs-toggle="pill" data-bs-target="#individual-upload" type="button" role="tab">
+                        <i class="bi bi-files"></i> Upload Individual Files
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="uploadMethodContent">
+                <!-- ZIP Upload Tab -->
+                <div class="tab-pane fade show active" id="zip-upload" role="tabpanel">
+                    <form id="zipUploadForm">
+                        <div class="alert alert-success" role="alert">
+                            <i class="bi bi-lightbulb-fill"></i> <strong>Easiest method!</strong> Just upload the ZIP file you downloaded from Instagram.
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="zipFile" class="form-label">
+                                <i class="bi bi-file-zip-fill"></i> Instagram Data Archive (ZIP file)
+                            </label>
+                            <input type="file" class="form-control form-control-lg" id="zipFile" accept=".zip" required>
+                            <div class="form-text">
+                                Upload the complete ZIP file from Instagram. The system will automatically extract the required files.
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg btn-analyze">
+                                <i class="bi bi-rocket-takeoff"></i> Analyze Data from ZIP
+                            </button>
+                        </div>
+                    </form>
                 </div>
                 
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary btn-lg btn-analyze">
-                        <i class="bi bi-rocket-takeoff"></i> Analyze Data
-                    </button>
+                <!-- Individual Files Upload Tab -->
+                <div class="tab-pane fade" id="individual-upload" role="tabpanel">
+                    <form id="individualUploadForm">
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i> You need to extract the ZIP first and navigate to: 
+                            <code>connections/followers_and_following/</code>
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="followingFile" class="form-label">
+                                    <i class="bi bi-file-earmark-code"></i> Following (following.json)
+                                </label>
+                                <input type="file" class="form-control" id="followingFile" accept=".json">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="followersFile" class="form-label">
+                                    <i class="bi bi-file-earmark-code"></i> Followers (followers_1.json)
+                                </label>
+                                <input type="file" class="form-control" id="followersFile" accept=".json">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="pendingFile" class="form-label">
+                                    <i class="bi bi-file-earmark-code"></i> Pending Requests 
+                                    <small class="text-muted">(pending_follow_requests.json)</small>
+                                </label>
+                                <input type="file" class="form-control" id="pendingFile" accept=".json">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="receivedFile" class="form-label">
+                                    <i class="bi bi-file-earmark-code"></i> Received Requests 
+                                    <small class="text-muted">(follow_requests_you've_received.json)</small>
+                                </label>
+                                <input type="file" class="form-control" id="receivedFile" accept=".json">
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg btn-analyze">
+                                <i class="bi bi-rocket-takeoff"></i> Analyze Data
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
         
         <!-- Loading Spinner -->
@@ -521,26 +567,8 @@
             });
         }
         
-        // Handle form submission
-        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const followingFile = document.getElementById('followingFile').files[0];
-            const followersFile = document.getElementById('followersFile').files[0];
-            const pendingFile = document.getElementById('pendingFile').files[0];
-            const receivedFile = document.getElementById('receivedFile').files[0];
-            
-            if (!followingFile || !followersFile || !pendingFile || !receivedFile) {
-                showToast('Missing Files', 'Please upload all four required JSON files', 'error');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('following', followingFile);
-            formData.append('followers', followersFile);
-            formData.append('pending', pendingFile);
-            formData.append('received', receivedFile);
-            
+        // Common function to process uploaded data
+        async function processData(formData) {
             // Show loading spinner
             document.getElementById('loadingSpinner').classList.remove('d-none');
             document.getElementById('resultsSection').classList.add('d-none');
@@ -582,6 +610,46 @@
                 document.getElementById('loadingSpinner').classList.add('d-none');
                 showToast('Error', error.message, 'error');
             }
+        }
+        
+        // Handle ZIP file upload
+        document.getElementById('zipUploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const zipFile = document.getElementById('zipFile').files[0];
+            
+            if (!zipFile) {
+                showToast('Missing File', 'Please select a ZIP file', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('zipfile', zipFile);
+            
+            await processData(formData);
+        });
+        
+        // Handle individual files upload
+        document.getElementById('individualUploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const followingFile = document.getElementById('followingFile').files[0];
+            const followersFile = document.getElementById('followersFile').files[0];
+            const pendingFile = document.getElementById('pendingFile').files[0];
+            const receivedFile = document.getElementById('receivedFile').files[0];
+            
+            if (!followingFile || !followersFile || !pendingFile || !receivedFile) {
+                showToast('Missing Files', 'Please upload all four required JSON files', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('following', followingFile);
+            formData.append('followers', followersFile);
+            formData.append('pending', pendingFile);
+            formData.append('received', receivedFile);
+            
+            await processData(formData);
         });
     </script>
 </body>
